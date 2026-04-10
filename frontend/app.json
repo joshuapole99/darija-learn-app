@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Darija Learn",
+    "slug": "darija-learn",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#2E7D32"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.joshu.darijalearn"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2E7D32"
+      },
+      "package": "com.joshu.darijalearn"
+    },
+    "scheme": "darija-learn",
+    "plugins": ["expo-router"]
+  }
+}

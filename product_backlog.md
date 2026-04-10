@@ -86,3 +86,21 @@ Elk eiland heeft 5 oefenlessen + 1 afsluitende toets.
 - App werkt offline voor alle basis lessen — geen internetverbinding vereist voor MVP
 - Joshua vult zelf alle lesinhoud in (zie `/content/lessen/`)
 - AI (Claude) genereert nooit zelf Darija-lesinhoud — alleen verhalen en coaching in V2
+
+---
+
+## Infrastructuur & DevOps
+
+| # | Item | Beschrijving | Status |
+|---|------|--------------|--------|
+| I1 | Supabase project opzetten | PostgreSQL database + Auth + File Storage in één service. Schema: users, progress, lessons, questions, words | Todo |
+| I2 | Auth implementeren | Email/wachtwoord + **Apple Sign-In** (App Store vereiste als andere OAuth wordt aangeboden) via Supabase Auth | Todo |
+| I3 | Audio opslag (Supabase Storage) | Native speaker .mp3 bestanden uploaden, `audioUrl` opslaan in lessons-tabel, expo-av integreren voor afspelen | Todo |
+| I4 | EAS Build instellen | Cloud iOS-builds zonder Mac: `eas build --platform ios` → TestFlight-klaar .ipa. Gratis tot 30 builds/maand | Todo |
+| I5 | Apple Developer account | $99/jaar — vereist voor TestFlight distributie en App Store release | Todo |
+| I6 | EAS Update (OTA) | Lesinhoud updaten zonder App Store review via over-the-air JS bundle update. Kritisch voor een content-gedreven app | Todo |
+| I7 | Push notificaties | `expo-notifications` + Supabase Edge Function als dagelijkse cron: "Tijd om te oefenen!" voor inactieve users | Todo |
+| I8 | Sentry crash reporting | `@sentry/react-native` — gratis tier, stack traces uit productie builds, direct zien wat crasht | Todo |
+| I9 | Analytics (PostHog) | Bijhouden welke lessen worden voltooid, waar gebruikers afhaken, welke vragen het meest fout worden beantwoord | Todo |
+| I10 | Admin panel voor lesinhoud | Eenvoudig scherm (of Sanity CMS) zodat Joshua lessen kan toevoegen en aanpassen zonder code te wijzigen | Todo |
+| I11 | GitHub Actions CI | Automatische EAS build triggeren bij push naar `main` branch | Todo |
