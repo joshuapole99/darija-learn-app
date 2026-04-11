@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
+  Modal,
   StyleSheet,
   SafeAreaView,
   ScrollView,
@@ -90,7 +92,7 @@ function LevelCard({ xp, username }: { xp: number; username: string }) {
 
       <Text style={styles.characterEmoji}>{level.emoji}</Text>
       <Text style={styles.usernaam}>{username}</Text>
-      <Text style={styles.niveauNaam}>Niveau {level.naam}</Text>
+      <Text style={styles.niveauNaam}>{level.naam}</Text>
       <Text style={styles.characterTitel}>{level.titel}</Text>
       <Text style={styles.characterOndertitel}>{level.ondertitel}</Text>
 
@@ -159,13 +161,90 @@ function LeaderboardCard({
   );
 }
 
+// ─── Gebruikersnaam wijzigen modal ───────────────────────────────────────────
+
+function GebruikersnaamModal({
+  zichtbaar,
+  huidig,
+  onSluiten,
+  onOpgeslagen,
+}: {
+  zichtbaar: boolean;
+  huidig: string;
+  onSluiten: () => void;
+  onOpgeslagen: (nieuw: string) => void;
+}) {
+  const { session } = useAuth();
+  const [nieuw, setNieuw] = useState(huidig);
+  const [bezig, setBezig] = useState(false);
+  const [fout, setFout] = useState('');
+
+  async function handleOpslaan() {
+    const trimmed = nieuw.trim();
+    if (trimmed.length < 3) {
+      setFout('Minimaal 3 tekens.');
+      return;
+    }
+    if (!session?.user.id) return;
+    setBezig(true);
+    setFout('');
+    const { error } = await supabase
+      .from('profiles')
+      .update({ username: trimmed })
+      .eq('id', session.user.id);
+    setBezig(false);
+    if (error) {
+      setFout(error.code === '23505' ? 'Deze naam is al bezet.' : 'Opslaan mislukt.');
+      return;
+    }
+    onOpgeslagen(trimmed);
+  }
+
+  return (
+    <Modal visible={zichtbaar} animationType="slide" transparent onRequestClose={onSluiten}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitel}>Gebruikersnaam wijzigen</Text>
+            <TouchableOpacity onPress={onSluiten}>
+              <Text style={styles.modalSluiten}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={styles.usernaamInput}
+            value={nieuw}
+            onChangeText={setNieuw}
+            autoCapitalize="none"
+            autoFocus
+            placeholder="Nieuwe gebruikersnaam"
+            placeholderTextColor="#bbb"
+          />
+          {fout !== '' && (
+            <View style={styles.foutBox}>
+              <Text style={styles.foutText}>{fout}</Text>
+            </View>
+          )}
+          <TouchableOpacity
+            style={[styles.opslaanBtn, bezig && styles.btnDisabled]}
+            onPress={handleOpslaan}
+            disabled={bezig}
+          >
+            <Text style={styles.opslaanBtnText}>{bezig ? 'Opslaan...' : 'Opslaan'}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function ProfielScreen() {
   const { progress, errorsToday } = useProgress();
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, refreshProfile } = useAuth();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+  const [usernaamModal, setUsernaamModal] = useState(false);
 
   const completedLessons = progress?.completedLessons.length ?? 0;
   const unlockedIslands = progress?.unlockedIslands.length ?? 1;
@@ -202,6 +281,9 @@ export default function ProfielScreen() {
         </View>
 
         <LevelCard xp={xp} username={username} />
+        <TouchableOpacity style={styles.wijzigNaamBtn} onPress={() => setUsernaamModal(true)}>
+          <Text style={styles.wijzigNaamText}>✏️ Gebruikersnaam wijzigen</Text>
+        </TouchableOpacity>
 
         <View style={styles.statsRow}>
           <StatCard emoji="⚡" label="Totaal XP" value={xp} />
@@ -220,6 +302,16 @@ export default function ProfielScreen() {
           <Text style={styles.uitloggenBtnText}>Uitloggen</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <GebruikersnaamModal
+        zichtbaar={usernaamModal}
+        huidig={username}
+        onSluiten={() => setUsernaamModal(false)}
+        onOpgeslagen={async () => {
+          setUsernaamModal(false);
+          await refreshProfile();
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -313,6 +405,62 @@ const styles = StyleSheet.create({
   leaderboardNaam: { fontSize: 14, fontWeight: '700', color: '#1a1a1a' },
   leaderboardSub: { fontSize: 11, color: '#999', marginTop: 1 },
   leaderboardXP: { fontSize: 14, fontWeight: '800', color: '#2E7D32' },
+
+  wijzigNaamBtn: {
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    backgroundColor: '#F0E6D3',
+    borderRadius: 10,
+    marginTop: -10,
+  },
+  wijzigNaamText: { fontSize: 13, color: '#7A5C3A', fontWeight: '600' },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: '#FDF6EC',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    gap: 14,
+    paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalTitel: { fontSize: 20, fontWeight: '800', color: '#1a1a1a' },
+  modalSluiten: { fontSize: 18, color: '#888', padding: 4 },
+  usernaamInput: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E0D5C5',
+    padding: 14,
+    fontSize: 15,
+    color: '#1a1a1a',
+  },
+  foutBox: { backgroundColor: '#FFEBEE', borderRadius: 10, padding: 12 },
+  foutText: { color: '#C62828', fontSize: 14, fontWeight: '500' },
+  opslaanBtn: {
+    backgroundColor: '#2E7D32',
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#2E7D32',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  btnDisabled: { backgroundColor: '#B0BEC5', shadowOpacity: 0, elevation: 0 },
+  opslaanBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 
   uitloggenBtn: {
     width: '100%',

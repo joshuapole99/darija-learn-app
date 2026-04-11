@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ScrollView,
+  FlatList,
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -13,6 +15,39 @@ import {
 import { router } from 'expo-router';
 import { ISLANDS, Island } from '../../src/data/lessonData';
 import { useProgress } from '../../src/hooks/useProgress';
+
+// ─── Woordenboek helpers ──────────────────────────────────────────────────────
+
+interface Woord {
+  darija: string;
+  dutch: string;
+  eiland: string;
+}
+
+function extractWoorden(): Woord[] {
+  const map = new Map<string, Woord>();
+  for (const island of ISLANDS) {
+    for (const lesson of island.lessons) {
+      for (const q of lesson.questions) {
+        // "Wat betekent "X"?" → darija=X, dutch=correctAnswer
+        const betekentMatch = q.question.match(/Wat betekent ["'](.+?)["']\??/);
+        if (betekentMatch) {
+          const darija = betekentMatch[1];
+          const dutch = q.correctAnswer;
+          if (!map.has(darija)) map.set(darija, { darija, dutch, eiland: island.name });
+        }
+        // "Hoe zeg je "X" in Darija?" → dutch=X, darija=correctAnswer
+        const zegjeMatch = q.question.match(/Hoe zeg je ["'](.+?)["'] in Darija\??/);
+        if (zegjeMatch) {
+          const dutch = zegjeMatch[1];
+          const darija = q.correctAnswer;
+          if (!map.has(darija)) map.set(darija, { darija, dutch, eiland: island.name });
+        }
+      }
+    }
+  }
+  return Array.from(map.values()).sort((a, b) => a.darija.localeCompare(b.darija));
+}
 
 function IslandInfoModal({
   island,
@@ -138,9 +173,76 @@ function PathConnector() {
   return <View style={styles.connector} />;
 }
 
+// ─── Woordenboek modal ────────────────────────────────────────────────────────
+
+function WoordenboekModal({
+  zichtbaar,
+  onSluiten,
+}: {
+  zichtbaar: boolean;
+  onSluiten: () => void;
+}) {
+  const [zoek, setZoek] = useState('');
+  const alleWoorden = useMemo(() => extractWoorden(), []);
+
+  const gefilterd = useMemo(() => {
+    const q = zoek.trim().toLowerCase();
+    if (!q) return alleWoorden;
+    return alleWoorden.filter(
+      (w) => w.darija.toLowerCase().includes(q) || w.dutch.toLowerCase().includes(q)
+    );
+  }, [zoek, alleWoorden]);
+
+  return (
+    <Modal visible={zichtbaar} animationType="slide" transparent onRequestClose={onSluiten}>
+      <View style={styles.wbOverlay}>
+        <View style={styles.wbSheet}>
+          <View style={styles.wbHeader}>
+            <Text style={styles.wbTitel}>📖 Woordenboek</Text>
+            <TouchableOpacity onPress={onSluiten}>
+              <Text style={styles.wbSluiten}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TextInput
+            style={styles.wbZoekInput}
+            placeholder="Zoek op Darija of Nederlands..."
+            placeholderTextColor="#bbb"
+            value={zoek}
+            onChangeText={setZoek}
+            autoCapitalize="none"
+          />
+
+          <Text style={styles.wbAantal}>{gefilterd.length} woord{gefilterd.length !== 1 ? 'en' : ''}</Text>
+
+          <FlatList
+            data={gefilterd}
+            keyExtractor={(item) => item.darija}
+            style={styles.wbList}
+            ItemSeparatorComponent={() => <View style={styles.wbSeparator} />}
+            renderItem={({ item }) => (
+              <View style={styles.wbRij}>
+                <View style={styles.wbRijLinks}>
+                  <Text style={styles.wbDarija}>{item.darija}</Text>
+                  <Text style={styles.wbEiland}>{item.eiland}</Text>
+                </View>
+                <Text style={styles.wbDutch}>{item.dutch}</Text>
+              </View>
+            )}
+            ListEmptyComponent={
+              <Text style={styles.wbLeeg}>Geen woorden gevonden</Text>
+            }
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 export default function IslandMapScreen() {
   const { isIslandUnlocked, isLoading, errorsToday, canMakeError, progress } = useProgress();
   const [infoIsland, setInfoIsland] = useState<Island | null>(null);
+  const [woordenboekOpen, setWoordenboekOpen] = useState(false);
 
   const introIsland = ISLANDS.find((i) => i.isIntro);
   const mainIslands = ISLANDS.filter((i) => !i.isIntro);
@@ -213,10 +315,24 @@ export default function IslandMapScreen() {
         </View>
       </ScrollView>
 
+      {/* Drijvende woordenboek knop */}
+      <TouchableOpacity
+        style={styles.wbFab}
+        onPress={() => setWoordenboekOpen(true)}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.wbFabEmoji}>📖</Text>
+      </TouchableOpacity>
+
       <IslandInfoModal
         island={infoIsland}
         visible={infoIsland !== null}
         onClose={() => setInfoIsland(null)}
+      />
+
+      <WoordenboekModal
+        zichtbaar={woordenboekOpen}
+        onSluiten={() => setWoordenboekOpen(false)}
       />
     </SafeAreaView>
   );
@@ -488,4 +604,71 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
+
+  // Floating woordenboek knop
+  wbFab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#2E7D32',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#2E7D32',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  wbFabEmoji: { fontSize: 26 },
+
+  // Woordenboek modal
+  wbOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'flex-end',
+  },
+  wbSheet: {
+    backgroundColor: '#FDF6EC',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: 0,
+    height: '85%',
+  },
+  wbHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  wbTitel: { fontSize: 20, fontWeight: '800', color: '#1a1a1a' },
+  wbSluiten: { fontSize: 18, color: '#888', padding: 4 },
+  wbZoekInput: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E0D5C5',
+    padding: 12,
+    fontSize: 14,
+    color: '#1a1a1a',
+    marginBottom: 10,
+  },
+  wbAantal: { fontSize: 12, color: '#aaa', marginBottom: 8 },
+  wbList: { flex: 1 },
+  wbSeparator: { height: 1, backgroundColor: '#F0E6D3' },
+  wbRij: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+  },
+  wbRijLinks: { flex: 1 },
+  wbDarija: { fontSize: 16, fontWeight: '700', color: '#1a1a1a' },
+  wbEiland: { fontSize: 11, color: '#aaa', marginTop: 2 },
+  wbDutch: { fontSize: 15, color: '#2E7D32', fontWeight: '600' },
+  wbLeeg: { fontSize: 14, color: '#aaa', textAlign: 'center', paddingVertical: 24 },
 });
