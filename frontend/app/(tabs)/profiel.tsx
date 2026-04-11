@@ -33,14 +33,14 @@ const LEVELS: CharacterLevel[] = [
     minIslands: 3,
     emoji: '🐣',
     naam: 'Peuter',
-    titel: 'Piepjonge leerder',
+    titel: 'Eerste stapjes',
     ondertitel: '"Da... ri... ja? Lekker woord!"',
     kleur: '#FFD54F',
   },
   {
     minIslands: 6,
     emoji: '🤪',
-    naam: 'Dyslect Kind',
+    naam: 'Dyslect',
     titel: 'Enthousiast maar chaotisch',
     ondertitel: '"Slaim alekom iedereen!!"',
     kleur: '#AED581',
@@ -48,65 +48,65 @@ const LEVELS: CharacterLevel[] = [
   {
     minIslands: 9,
     emoji: '👵',
-    naam: 'Dement Omatje',
-    titel: 'Weet het soms',
-    ondertitel: '"Salam of salami? Wacht, ik weet het..."',
+    naam: 'Lhajja',
+    titel: 'Vastberaden leerder',
+    ondertitel: '"Ik ga dit leren als het laatste is wat ik doe."',
     kleur: '#80CBC4',
   },
   {
     minIslands: 12,
-    emoji: '😒',
+    emoji: '😤',
     naam: 'Puber',
     titel: 'Weet alles (denkt ie)',
-    ondertitel: '"Tss, labas, whatever."',
+    ondertitel: '"Tss. Ik snap het al, echt."',
     kleur: '#90CAF9',
   },
   {
     minIslands: 15,
-    emoji: '🥴',
-    naam: 'Stagiair',
-    titel: 'Snapt het bijna',
-    ondertitel: '"Ik doe mijn best, echt."',
+    emoji: '🧑',
+    naam: 'Meskeen',
+    titel: 'Doet zijn best',
+    ondertitel: '"Bijna... nog even..."',
     kleur: '#CE93D8',
   },
   {
     minIslands: 18,
-    emoji: '🧑',
-    naam: 'Jongvolwassene',
-    titel: 'Ana kanfahem!',
-    ondertitel: '"Ik kijk al series zonder ondertitels (bijna)"',
+    emoji: '🧑‍🎓',
+    naam: 'Gevorderd',
+    titel: 'Serieuze leerder',
+    ondertitel: '"Ana kanfahem — ik begin het echt te snappen."',
     kleur: '#F48FB1',
   },
   {
     minIslands: 21,
     emoji: '🧑‍💼',
-    naam: 'Volwassene',
-    titel: 'Serieuze leerder',
-    ondertitel: '"Mijn neef is trots op mij."',
+    naam: 'Sha3b',
+    titel: 'Zelfverzekerd spreker',
+    ondertitel: '"Ik kan een gesprek voeren. Bijna."',
     kleur: '#4DB6AC',
   },
   {
     minIslands: 24,
     emoji: '🧓',
-    naam: 'Wijze Opa',
-    titel: 'Kom, ik leer jou iets',
-    ondertitel: '"Salam ya weld, zit neer."',
+    naam: 'Jedd',
+    titel: 'Ervaren en wijs',
+    ondertitel: '"Salam ya weld, kom zit, ik leer jou iets."',
     kleur: '#A5D6A7',
   },
   {
     minIslands: 27,
     emoji: '🎓',
-    naam: 'Darija Geleerde',
-    titel: '3ndi bzzaf d l-3lm',
-    ondertitel: '"Ik heb veel kennis — in het Darija."',
+    naam: 'l-3alim',
+    titel: 'De kenner',
+    ondertitel: '"3ndi bzzaf d l-3lm — ik weet veel."',
     kleur: '#FFD700',
   },
   {
     minIslands: 30,
     emoji: '👑',
-    naam: 'Darija Meester',
-    titel: 'Ana l-ostaz',
-    ondertitel: '"Wie heeft er nog vragen? Ja, ik dacht het al."',
+    naam: 'l-Ostaz',
+    titel: 'De meester',
+    ondertitel: '"Ana l-ostaz. Wie heeft er vragen?"',
     kleur: '#FF8F00',
   },
 ];
@@ -203,32 +203,6 @@ export default function ProfielScreen() {
           <StatCard emoji="✅" label="Lessen voltooid" value={completedLessons} />
           <StatCard emoji="🏝️" label="Eilanden unlock" value={`${unlockedIslands}/${totalIslands}`} />
           <StatCard emoji="❌" label="Fouten vandaag" value={`${errorsToday}/5`} />
-        </View>
-
-        {/* Alle niveaus als roadmap */}
-        <View style={styles.roademapBox}>
-          <Text style={styles.roadmapTitle}>Jouw reis</Text>
-          {LEVELS.map((lvl, i) => {
-            const reached = unlockedIslands >= lvl.minIslands;
-            const isCurrent = getLevel(unlockedIslands).naam === lvl.naam;
-            return (
-              <View key={i} style={[styles.roadmapRow, isCurrent && styles.roadmapRowCurrent]}>
-                <Text style={[styles.roadmapEmoji, !reached && styles.roadmapDimmed]}>
-                  {reached ? lvl.emoji : '🔒'}
-                </Text>
-                <View style={styles.roadmapText}>
-                  <Text style={[styles.roadmapNaam, !reached && styles.roadmapDimmed]}>
-                    {lvl.naam}
-                    {isCurrent ? '  ← jij' : ''}
-                  </Text>
-                  <Text style={[styles.roadmapSub, !reached && styles.roadmapDimmed]}>
-                    {lvl.minIslands === 0 ? 'Start' : `vanaf ${lvl.minIslands} eilanden`}
-                  </Text>
-                </View>
-                {reached && !isCurrent && <Text style={styles.roadmapCheck}>✓</Text>}
-              </View>
-            );
-          })}
         </View>
 
         <View style={styles.comingSoon}>
@@ -368,64 +342,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#888',
     textAlign: 'center',
-  },
-
-  // Roadmap
-  roademapBox: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    gap: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  roadmapTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 12,
-  },
-  roadmapRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 10,
-  },
-  roadmapRowCurrent: {
-    backgroundColor: '#FFF8F0',
-    paddingHorizontal: 10,
-  },
-  roadmapEmoji: {
-    fontSize: 24,
-    width: 32,
-    textAlign: 'center',
-  },
-  roadmapText: {
-    flex: 1,
-    gap: 1,
-  },
-  roadmapNaam: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  roadmapSub: {
-    fontSize: 11,
-    color: '#999',
-  },
-  roadmapCheck: {
-    fontSize: 16,
-    color: '#2E7D32',
-    fontWeight: 'bold',
-  },
-  roadmapDimmed: {
-    opacity: 0.35,
   },
 
   // Coming soon
