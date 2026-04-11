@@ -15,4 +15,17 @@ Format: `[versie] — datum — beschrijving`
 
 ---
 
-_Volgende versie: v0.2 — eerste lessen content + basis UI schets_
+## v0.2 — 2026-04-11
+
+- Eilandenkaart uitgebreid naar 30 eilanden (3 chapters × 10)
+- Bottom tab navigatie toegevoegd (Eilanden, Oefeningen, Profiel)
+- Intro-eiland "Schrift & Uitspraak" toegevoegd vóór hoofdstuk 1
+- Interactieve uitspraaklessen gebouwd (9 klanken + schrijfregels + quiz)
+- Schrijfconventies vastgesteld: ou, ch, sh, 7, 9, 3, kh, gh, ha
+- Info-modal (ℹ️) op elk eiland met lesinhoud-uitleg
+- Oefeningen tab: lees- en luisteroefeningen (werkende UI, audio volgt)
+- Profiel tab toegevoegd met live statistieken uit voortgangssysteem
+
+---
+
+_Volgende versie: v0.3 — lesinhoud eilanden 2–10 + audio native speakers_
