@@ -19,7 +19,8 @@ export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const lesson = getLessonById(id);
   const { markLessonComplete, recordError, canMakeError } = useProgress();
-  const { session, refreshProfile } = useAuth();
+  const { session, refreshProfile, profile } = useAuth();
+  const isPremium = profile?.is_premium ?? false;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -134,7 +135,7 @@ export default function QuizScreen() {
                 Het juiste antwoord is: <Text style={styles.feedbackAnswer}>{question.correctAnswer}</Text>
               </Text>
             )}
-            {!canMakeError && !isCorrect && (
+            {!canMakeError && !isCorrect && !isPremium && (
               <Text style={styles.limitWarning}>
                 Je hebt vandaag 5 fouten bereikt. Je kunt nog wel de huidige les afmaken.
               </Text>

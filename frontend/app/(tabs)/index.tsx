@@ -15,6 +15,7 @@ import {
 import { router } from 'expo-router';
 import { ISLANDS, Island } from '../../src/data/lessonData';
 import { useProgress } from '../../src/hooks/useProgress';
+import { useAuth } from '../../src/context/AuthContext';
 
 // ─── Woordenboek helpers ──────────────────────────────────────────────────────
 
@@ -241,6 +242,8 @@ function WoordenboekModal({
 
 export default function IslandMapScreen() {
   const { isIslandUnlocked, isLoading, errorsToday, canMakeError, progress } = useProgress();
+  const { profile } = useAuth();
+  const isPremium = profile?.is_premium ?? false;
   const [infoIsland, setInfoIsland] = useState<Island | null>(null);
   const [woordenboekOpen, setWoordenboekOpen] = useState(false);
 
@@ -266,14 +269,14 @@ export default function IslandMapScreen() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Darija Learn</Text>
           <Text style={styles.headerSubtitle}>Mrhba! Klaar om te leren? 🌍</Text>
-          {!canMakeError && (
+          {!canMakeError && !isPremium && (
             <View style={styles.limitBanner}>
               <Text style={styles.limitText}>
                 Je hebt vandaag 5 fouten gemaakt. Kom morgen terug! 💪
               </Text>
             </View>
           )}
-          {canMakeError && errorsToday > 0 && (
+          {canMakeError && errorsToday > 0 && !isPremium && (
             <Text style={styles.errorsText}>Fouten vandaag: {errorsToday}/5</Text>
           )}
         </View>

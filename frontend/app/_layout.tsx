@@ -1,9 +1,16 @@
-import { Stack, Redirect } from 'expo-router';
+import { Stack } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
+import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { scheduleDailyReminder } from '../src/lib/notifications';
 
 function RootNavigator() {
   const { session, isLoading } = useAuth();
+
+  useEffect(() => {
+    // Plan dagelijkse herinnering bij elke app-open (reset de timer)
+    scheduleDailyReminder();
+  }, []);
 
   if (isLoading) {
     return (

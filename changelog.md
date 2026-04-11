@@ -5,24 +5,28 @@ Format: `[versie] — datum — beschrijving`
 
 ---
 
-## v0.1 — 2026-04-10
+## v0.4 — 2026-04-12
 
-- Initial repository setup
-- Basis projectstructuur aangemaakt (frontend, backend, shared)
-- MVP planning gedefinieerd in product_backlog.md
-- AI-context en productregels vastgelegd in ai_context.md
-- README aangemaakt met projectomschrijving
+- Push notificaties: dagelijkse herinnering om 18:00 via expo-notifications
+- Free/Premium tier systeem: UI op profielpagina met feature-vergelijking
+- Premium bypast de 5-fouten-daglimiet (betaalgateway volgt via App Store)
+- XP-systeem: verdien XP per vraag, les en uitspraaklessen — 11 niveaus (Baby → l-Ostaz)
+- Streaks: dagelijkse leerstreak bijgehouden in Supabase
+- Ranglijst (leaderboard): top 10 op profielpagina gesorteerd op XP
+- Gebruikersnaam wijzigen op elk moment via profielpagina
+- Woordenboek: 📖 zwevende knop op eilandenkaart — doorzoekbaar woordenboek van alle leswoorden
+- Backlog volledig bijgewerkt met status van alle features
 
 ---
 
 ## v0.3 — 2026-04-12
 
 - Gebruikersaccounts toegevoegd via Supabase (registreren + inloggen)
-- Avatar kiezen bij registratie (5 avatars met Darija-namen: Assad, Tha3lab, Dhib, Nsser, Qamar)
-- Profiel tab toont nu echte gebruikersnaam en gekozen avatar
+- Profiel tab toont echte gebruikersnaam
 - Uitloggen knop toegevoegd op profiel pagina
-- Supabase RLS policies geconfigureerd (aparte INSERT/SELECT/UPDATE/DELETE policies)
+- Supabase RLS policies geconfigureerd
 - Bugfix: avatar-kiezen scherm buiten (auth) group gezet om redirect-loop te voorkomen
+- Avatar-code opgeslagen in `frontend/_saved/` voor later gebruik
 
 ---
 
@@ -39,4 +43,10 @@ Format: `[versie] — datum — beschrijving`
 
 ---
 
-_Volgende versie: v0.3 — lesinhoud eilanden 2–10 + audio native speakers_
+## v0.1 — 2026-04-10
+
+- Initial repository setup
+- Basis projectstructuur aangemaakt (frontend, backend, shared)
+- MVP planning gedefinieerd in product_backlog.md
+- AI-context en productregels vastgelegd in ai_context.md
+- README aangemaakt met projectomschrijving

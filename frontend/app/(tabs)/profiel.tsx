@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
+  Alert,
   StyleSheet,
   SafeAreaView,
   ScrollView,
@@ -161,6 +162,68 @@ function LeaderboardCard({
   );
 }
 
+// ─── Tier kaart ──────────────────────────────────────────────────────────────
+
+function TierCard({ isPremium }: { isPremium: boolean }) {
+  function handleUpgrade() {
+    Alert.alert(
+      'Premium upgraden',
+      'Betaling via de App Store komt binnenkort. Houd de app in de gaten!',
+      [{ text: 'Oke', style: 'default' }]
+    );
+  }
+
+  if (isPremium) {
+    return (
+      <View style={[styles.tierCard, styles.tierCardPremium]}>
+        <View style={styles.tierHeader}>
+          <Text style={styles.tierEmoji}>⭐</Text>
+          <View>
+            <Text style={styles.tierNaam}>Premium</Text>
+            <Text style={styles.tierSub}>Actief abonnement</Text>
+          </View>
+        </View>
+        <View style={styles.tierFeatures}>
+          {['Alle eilanden', 'XP & ranglijst', 'Onbeperkt fouten per dag', 'Onbeperkt oefenen'].map((f) => (
+            <View key={f} style={styles.tierRij}>
+              <Text style={styles.tierCheck}>✓</Text>
+              <Text style={styles.tierFeatureTekst}>{f}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.tierCard, styles.tierCardFree]}>
+      <View style={styles.tierHeader}>
+        <Text style={styles.tierEmoji}>🆓</Text>
+        <View>
+          <Text style={styles.tierNaam}>Gratis plan</Text>
+          <Text style={styles.tierSub}>Upgrade voor meer</Text>
+        </View>
+      </View>
+      <View style={styles.tierFeatures}>
+        {[
+          { tekst: 'Alle eilanden', ok: true },
+          { tekst: 'XP & ranglijst', ok: true },
+          { tekst: 'Max 5 fouten per dag', ok: false },
+          { tekst: 'Onbeperkt oefenen', ok: false },
+        ].map((f) => (
+          <View key={f.tekst} style={styles.tierRij}>
+            <Text style={[styles.tierCheck, !f.ok && styles.tierCross]}>{f.ok ? '✓' : '✗'}</Text>
+            <Text style={[styles.tierFeatureTekst, !f.ok && styles.tierFeatureTekstGrijs]}>{f.tekst}</Text>
+          </View>
+        ))}
+      </View>
+      <TouchableOpacity style={styles.upgradeBtn} onPress={handleUpgrade}>
+        <Text style={styles.upgradeBtnText}>Upgrade naar Premium →</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 // ─── Gebruikersnaam wijzigen modal ───────────────────────────────────────────
 
 function GebruikersnaamModal({
@@ -252,6 +315,7 @@ export default function ProfielScreen() {
   const username = profile?.username ?? 'Leerder';
   const xp = profile?.xp ?? 0;
   const streak = profile?.streak ?? 0;
+  const isPremium = profile?.is_premium ?? false;
 
   useEffect(() => {
     loadLeaderboard();
@@ -297,6 +361,8 @@ export default function ProfielScreen() {
           eigenUsername={username}
           isLoading={leaderboardLoading}
         />
+
+        <TierCard isPremium={isPremium} />
 
         <TouchableOpacity style={styles.uitloggenBtn} onPress={handleUitloggen}>
           <Text style={styles.uitloggenBtnText}>Uitloggen</Text>
@@ -405,6 +471,40 @@ const styles = StyleSheet.create({
   leaderboardNaam: { fontSize: 14, fontWeight: '700', color: '#1a1a1a' },
   leaderboardSub: { fontSize: 11, color: '#999', marginTop: 1 },
   leaderboardXP: { fontSize: 14, fontWeight: '800', color: '#2E7D32' },
+
+  // Tier card
+  tierCard: {
+    width: '100%',
+    borderRadius: 20,
+    padding: 20,
+    gap: 12,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  tierCardFree: { backgroundColor: '#fff', borderColor: '#E0D5C5' },
+  tierCardPremium: { backgroundColor: '#FFFDE7', borderColor: '#FFD700' },
+  tierHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  tierEmoji: { fontSize: 32 },
+  tierNaam: { fontSize: 18, fontWeight: '800', color: '#1a1a1a' },
+  tierSub: { fontSize: 12, color: '#888', marginTop: 2 },
+  tierFeatures: { gap: 6 },
+  tierRij: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  tierCheck: { fontSize: 14, fontWeight: '800', color: '#2E7D32', width: 16 },
+  tierCross: { color: '#C62828' },
+  tierFeatureTekst: { fontSize: 14, color: '#333' },
+  tierFeatureTekstGrijs: { color: '#aaa' },
+  upgradeBtn: {
+    backgroundColor: '#2E7D32',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  upgradeBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 
   wijzigNaamBtn: {
     alignSelf: 'flex-start',
