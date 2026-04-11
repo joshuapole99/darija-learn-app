@@ -2,12 +2,16 @@ import React from 'react';
 import {
   View,
   Text,
+  TouchableOpacity,
   StyleSheet,
   SafeAreaView,
   ScrollView,
 } from 'react-native';
+import { router } from 'expo-router';
 import { useProgress } from '../../src/hooks/useProgress';
 import { ISLANDS } from '../../src/data/lessonData';
+import { useAuth } from '../../src/context/AuthContext';
+import { getAvatarById } from '../../src/data/avatars';
 
 // ─── Niveau-systeem ───────────────────────────────────────────────────────────
 
@@ -143,8 +147,19 @@ function StatCard({ emoji, label, value }: { emoji: string; label: string; value
   );
 }
 
-function LevelCard({ unlocked, total }: { unlocked: number; total: number }) {
+function LevelCard({
+  unlocked,
+  total,
+  username,
+  avatarId,
+}: {
+  unlocked: number;
+  total: number;
+  username: string;
+  avatarId: number;
+}) {
   const level = getLevel(unlocked);
+  const avatar = getAvatarById(avatarId);
   const pct = Math.round(level.progress * 100);
 
   return (
@@ -156,8 +171,14 @@ function LevelCard({ unlocked, total }: { unlocked: number; total: number }) {
         </Text>
       </View>
 
-      {/* Poppetje */}
-      <Text style={styles.characterEmoji}>{level.emoji}</Text>
+      {/* Avatar + naam */}
+      <View style={[styles.avatarCircle, { backgroundColor: avatar.kleur + '22' }]}>
+        <Text style={styles.characterEmoji}>{avatar.emoji}</Text>
+      </View>
+      <Text style={styles.usernaam}>{username}</Text>
+      <Text style={styles.avatarNaamLabel}>{avatar.naam} · {avatar.darijaWoord}</Text>
+
+      {/* Niveau */}
       <Text style={styles.characterNaam}>{level.naam}</Text>
       <Text style={styles.characterTitel}>{level.titel}</Text>
       <Text style={styles.characterOndertitel}>{level.ondertitel}</Text>
@@ -184,11 +205,20 @@ function LevelCard({ unlocked, total }: { unlocked: number; total: number }) {
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function ProfielScreen() {
-  const { progress, isLoading, errorsToday } = useProgress();
+  const { progress, errorsToday } = useProgress();
+  const { profile, signOut } = useAuth();
 
   const completedLessons = progress?.completedLessons.length ?? 0;
   const unlockedIslands = progress?.unlockedIslands.length ?? 1;
   const totalIslands = ISLANDS.length;
+
+  const username = profile?.username ?? 'Leerder';
+  const avatarId = profile?.avatar_id ?? 1;
+
+  async function handleUitloggen() {
+    await signOut();
+    router.replace('/(auth)/welkom');
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -197,7 +227,7 @@ export default function ProfielScreen() {
           <Text style={styles.headerTitle}>Profiel</Text>
         </View>
 
-        <LevelCard unlocked={unlockedIslands} total={totalIslands} />
+        <LevelCard unlocked={unlockedIslands} total={totalIslands} username={username} avatarId={avatarId} />
 
         <View style={styles.statsRow}>
           <StatCard emoji="✅" label="Lessen voltooid" value={completedLessons} />
@@ -209,9 +239,13 @@ export default function ProfielScreen() {
           <Text style={styles.comingSoonEmoji}>🚧</Text>
           <Text style={styles.comingSoonTitle}>Meer komt binnenkort</Text>
           <Text style={styles.comingSoonText}>
-            Streaks, XP-punten, accounts en een ranglijst worden toegevoegd in de volgende versie.
+            Streaks, XP-punten en een ranglijst worden toegevoegd in de volgende versie.
           </Text>
         </View>
+
+        <TouchableOpacity style={styles.uitloggenBtn} onPress={handleUitloggen}>
+          <Text style={styles.uitloggenBtnText}>Uitloggen</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -266,9 +300,27 @@ const styles = StyleSheet.create({
     color: '#fff',
     letterSpacing: 1,
   },
-  characterEmoji: {
-    fontSize: 72,
+  avatarCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginVertical: 4,
+  },
+  characterEmoji: {
+    fontSize: 52,
+  },
+  usernaam: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1a1a1a',
+    marginTop: 2,
+  },
+  avatarNaamLabel: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 6,
   },
   characterNaam: {
     fontSize: 22,
@@ -366,5 +418,20 @@ const styles = StyleSheet.create({
     color: '#7A5C3A',
     textAlign: 'center',
     lineHeight: 18,
+  },
+
+  uitloggenBtn: {
+    width: '100%',
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#C62828',
+    marginBottom: 12,
+  },
+  uitloggenBtnText: {
+    color: '#C62828',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
