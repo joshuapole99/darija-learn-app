@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   ScrollView,
   FlatList,
@@ -11,6 +11,8 @@ import {
   SafeAreaView,
   Modal,
   Pressable,
+  Animated,
+  PanResponder,
 } from 'react-native';
 import { router } from 'expo-router';
 import { ISLANDS, Island } from '../../src/data/lessonData';
@@ -185,6 +187,26 @@ function WoordenboekModal({
 }) {
   const [zoek, setZoek] = useState('');
   const alleWoorden = useMemo(() => extractWoorden(), []);
+  const translateY = useRef(new Animated.Value(0)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gs) => gs.dy > 5 && Math.abs(gs.dy) > Math.abs(gs.dx),
+      onPanResponderMove: (_, gs) => {
+        if (gs.dy > 0) translateY.setValue(gs.dy);
+      },
+      onPanResponderRelease: (_, gs) => {
+        if (gs.dy > 120 || gs.vy > 0.8) {
+          Animated.timing(translateY, { toValue: 600, duration: 200, useNativeDriver: true }).start(() => {
+            translateY.setValue(0);
+            onSluiten();
+          });
+        } else {
+          Animated.spring(translateY, { toValue: 0, useNativeDriver: true }).start();
+        }
+      },
+    })
+  ).current;
 
   const gefilterd = useMemo(() => {
     const q = zoek.trim().toLowerCase();
@@ -196,11 +218,20 @@ function WoordenboekModal({
 
   return (
     <Modal visible={zichtbaar} animationType="slide" transparent onRequestClose={onSluiten}>
-      <View style={styles.wbOverlay}>
-        <View style={styles.wbSheet}>
+      <Pressable style={styles.wbOverlay} onPress={onSluiten}>
+        <Animated.View
+          style={[styles.wbSheet, { transform: [{ translateY }] }]}
+          onStartShouldSetResponder={() => true}
+          onTouchEnd={(e) => e.stopPropagation()}
+        >
+          {/* Drag handle */}
+          <View {...panResponder.panHandlers} style={styles.wbHandleArea}>
+            <View style={styles.wbHandle} />
+          </View>
+
           <View style={styles.wbHeader}>
             <Text style={styles.wbTitel}>📖 Woordenboek</Text>
-            <TouchableOpacity onPress={onSluiten}>
+            <TouchableOpacity onPress={onSluiten} hitSlop={12}>
               <Text style={styles.wbSluiten}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -220,6 +251,7 @@ function WoordenboekModal({
             data={gefilterd}
             keyExtractor={(item) => item.darija}
             style={styles.wbList}
+            keyboardShouldPersistTaps="handled"
             ItemSeparatorComponent={() => <View style={styles.wbSeparator} />}
             renderItem={({ item }) => (
               <View style={styles.wbRij}>
@@ -234,8 +266,8 @@ function WoordenboekModal({
               <Text style={styles.wbLeeg}>Geen woorden gevonden</Text>
             }
           />
-        </View>
-      </View>
+        </Animated.View>
+      </Pressable>
     </Modal>
   );
 }
@@ -254,7 +286,7 @@ export default function IslandMapScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2E7D32" />
+        <ActivityIndicator size="large" color="#006233" />
       </View>
     );
   }
@@ -586,7 +618,7 @@ const styles = StyleSheet.create({
   },
   topicBullet: {
     fontSize: 14,
-    color: '#2E7D32',
+    color: '#006233',
     fontWeight: 'bold',
     lineHeight: 20,
   },
@@ -597,7 +629,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   closeButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#006233',
     borderRadius: 12,
     paddingHorizontal: 32,
     paddingVertical: 12,
@@ -616,10 +648,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#006233',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#2E7D32',
+    shadowColor: '#006233',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
@@ -637,9 +669,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#FDF6EC',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 20,
+    paddingHorizontal: 20,
     paddingBottom: 0,
     height: '85%',
+  },
+  wbHandleArea: {
+    width: '100%',
+    alignItems: 'center',
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  wbHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#D0C8BC',
   },
   wbHeader: {
     flexDirection: 'row',
@@ -672,6 +716,6 @@ const styles = StyleSheet.create({
   wbRijLinks: { flex: 1 },
   wbDarija: { fontSize: 16, fontWeight: '700', color: '#1a1a1a' },
   wbEiland: { fontSize: 11, color: '#aaa', marginTop: 2 },
-  wbDutch: { fontSize: 15, color: '#2E7D32', fontWeight: '600' },
+  wbDutch: { fontSize: 15, color: '#006233', fontWeight: '600' },
   wbLeeg: { fontSize: 14, color: '#aaa', textAlign: 'center', paddingVertical: 24 },
 });

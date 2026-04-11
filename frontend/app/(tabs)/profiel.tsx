@@ -38,7 +38,7 @@ const LEVELS: CharacterLevel[] = [
   { minXP: 1800, emoji: '🧑‍🎓', naam: 'Gevorderd', titel: 'Serieuze leerder',         ondertitel: '"Ana kanfahem — ik begin het echt te snappen."', kleur: '#F48FB1' },
   { minXP: 2500, emoji: '🧑‍💼', naam: 'Sha3b',     titel: 'Zelfverzekerd spreker',    ondertitel: '"Ik kan een gesprek voeren. Bijna."',            kleur: '#4DB6AC' },
   { minXP: 3500, emoji: '🧓',    naam: 'Jedd',      titel: 'Ervaren en wijs',          ondertitel: '"Salam ya weld, kom zit, ik leer jou iets."',   kleur: '#A5D6A7' },
-  { minXP: 5000, emoji: '🎓',    naam: 'l-3alim',   titel: 'De kenner',                ondertitel: '"3ndi bzzaf d l-3lm — ik weet veel."',          kleur: '#FFD700' },
+  { minXP: 5000, emoji: '🎓',    naam: 'l-3alim',   titel: 'De kenner',                ondertitel: '"3ndi bzzaf d l-3lm — ik weet veel."',          kleur: '#C9A84C' },
   { minXP: 7500, emoji: '👑',    naam: 'l-Ostaz',   titel: 'De meester',               ondertitel: '"Ana l-ostaz. Wie heeft er vragen?"',            kleur: '#FF8F00' },
 ];
 
@@ -129,7 +129,7 @@ function LeaderboardCard({
       <Text style={styles.leaderboardTitel}>🏆 Ranglijst</Text>
 
       {isLoading ? (
-        <ActivityIndicator color="#2E7D32" style={{ marginVertical: 16 }} />
+        <ActivityIndicator color="#006233" style={{ marginVertical: 16 }} />
       ) : entries.length === 0 ? (
         <Text style={styles.leaderboardLeeg}>Nog geen spelers</Text>
       ) : (
@@ -146,7 +146,7 @@ function LeaderboardCard({
               <Text style={styles.leaderboardMedal}>{medal}</Text>
               <Text style={styles.leaderboardEmoji}>{level.emoji}</Text>
               <View style={styles.leaderboardInfo}>
-                <Text style={[styles.leaderboardNaam, isEigen && { color: '#2E7D32' }]}>
+                <Text style={[styles.leaderboardNaam, isEigen && { color: '#006233' }]}>
                   {entry.username}{isEigen ? ' (jij)' : ''}
                 </Text>
                 <Text style={styles.leaderboardSub}>
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   leaderboardInfo: { flex: 1 },
   leaderboardNaam: { fontSize: 14, fontWeight: '700', color: '#1a1a1a' },
   leaderboardSub: { fontSize: 11, color: '#999', marginTop: 1 },
-  leaderboardXP: { fontSize: 14, fontWeight: '800', color: '#2E7D32' },
+  leaderboardXP: { fontSize: 14, fontWeight: '800', color: '#006233' },
 
   // Tier card
   tierCard: {
@@ -486,19 +486,19 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   tierCardFree: { backgroundColor: '#fff', borderColor: '#E0D5C5' },
-  tierCardPremium: { backgroundColor: '#FFFDE7', borderColor: '#FFD700' },
+  tierCardPremium: { backgroundColor: '#FFFDE7', borderColor: '#C9A84C' },
   tierHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   tierEmoji: { fontSize: 32 },
   tierNaam: { fontSize: 18, fontWeight: '800', color: '#1a1a1a' },
   tierSub: { fontSize: 12, color: '#888', marginTop: 2 },
   tierFeatures: { gap: 6 },
   tierRij: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  tierCheck: { fontSize: 14, fontWeight: '800', color: '#2E7D32', width: 16 },
+  tierCheck: { fontSize: 14, fontWeight: '800', color: '#006233', width: 16 },
   tierCross: { color: '#C62828' },
   tierFeatureTekst: { fontSize: 14, color: '#333' },
   tierFeatureTekstGrijs: { color: '#aaa' },
   upgradeBtn: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#006233',
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
@@ -549,11 +549,11 @@ const styles = StyleSheet.create({
   foutBox: { backgroundColor: '#FFEBEE', borderRadius: 10, padding: 12 },
   foutText: { color: '#C62828', fontSize: 14, fontWeight: '500' },
   opslaanBtn: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#006233',
     borderRadius: 14,
     padding: 16,
     alignItems: 'center',
-    shadowColor: '#2E7D32',
+    shadowColor: '#006233',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,

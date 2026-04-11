@@ -13,6 +13,13 @@ export default function WelkomScreen() {
           <Text style={styles.subtag}>Gemaakt voor Nederlanders met Marokkaanse roots</Text>
         </View>
 
+        {/* Marokkaanse vlag kleurbalk */}
+        <View style={styles.flagBar}>
+          <View style={styles.flagRed} />
+          <View style={styles.flagGreen} />
+          <View style={styles.flagRed} />
+        </View>
+
         <View style={styles.buttons}>
           <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push('/(auth)/registreren')}>
             <Text style={styles.primaryBtnText}>Maak een account aan</Text>
@@ -57,7 +64,7 @@ const styles = StyleSheet.create({
   tagline: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#2E7D32',
+    color: '#006233',
     textAlign: 'center',
   },
   subtag: {
@@ -67,15 +74,25 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     paddingHorizontal: 20,
   },
+  flagBar: {
+    flexDirection: 'row',
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 24,
+    gap: 3,
+  },
+  flagRed: { flex: 1, backgroundColor: '#C1121F', borderRadius: 2 },
+  flagGreen: { flex: 2, backgroundColor: '#006233', borderRadius: 2 },
   buttons: {
     gap: 12,
   },
   primaryBtn: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#006233',
     borderRadius: 14,
     padding: 17,
     alignItems: 'center',
-    shadowColor: '#2E7D32',
+    shadowColor: '#006233',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -91,10 +108,10 @@ const styles = StyleSheet.create({
     padding: 17,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#2E7D32',
+    borderColor: '#006233',
   },
   secondaryBtnText: {
-    color: '#2E7D32',
+    color: '#006233',
     fontSize: 16,
     fontWeight: '700',
   },

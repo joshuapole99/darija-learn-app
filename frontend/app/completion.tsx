@@ -35,7 +35,7 @@ export default function CompletionScreen() {
           origin={{ x: -10, y: 0 }}
           autoStart={false}
           fadeOut
-          colors={['#2E7D32', '#FFC107', '#E91E63', '#2196F3', '#FF5722']}
+          colors={['#006233', '#C1121F', '#C9A84C', '#FDF6EC', '#fff']}
         />
       )}
 
@@ -43,7 +43,7 @@ export default function CompletionScreen() {
         <Text style={styles.icon}>{didPass ? '🎉' : '😕'}</Text>
 
         <Text style={styles.scoreLabel}>Jouw score</Text>
-        <Text style={[styles.score, { color: didPass ? '#2E7D32' : '#C62828' }]}>
+        <Text style={[styles.score, { color: didPass ? '#006233' : '#C62828' }]}>
           {scoreNum}%
         </Text>
 
@@ -115,13 +115,13 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#fff',
     borderWidth: 2,
-    borderColor: '#2E7D32',
+    borderColor: '#006233',
     borderRadius: 14,
     padding: 18,
     alignItems: 'center',
   },
   retryText: {
-    color: '#2E7D32',
+    color: '#006233',
     fontSize: 17,
     fontWeight: '700',
   },
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   homeButtonPrimary: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#006233',
   },
   homeText: {
     color: '#555',

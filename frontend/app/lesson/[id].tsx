@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#006233',
   },
   content: {
     padding: 24,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   optionCorrect: {
     backgroundColor: '#E8F5E9',
-    borderColor: '#2E7D32',
+    borderColor: '#006233',
   },
   optionWrong: {
     backgroundColor: '#FFEBEE',
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   continueButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#006233',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
