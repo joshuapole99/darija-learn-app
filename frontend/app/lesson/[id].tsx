@@ -10,6 +10,8 @@ import {
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { getLessonById, QuizQuestion } from '../../src/data/lessonData';
 import { useProgress } from '../../src/hooks/useProgress';
+import { useAuth } from '../../src/context/AuthContext';
+import { addXP } from '../../src/lib/xp';
 
 type Phase = 'quiz' | 'feedback';
 
@@ -17,6 +19,7 @@ export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const lesson = getLessonById(id);
   const { markLessonComplete, recordError, canMakeError } = useProgress();
+  const { session, refreshProfile } = useAuth();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -54,6 +57,12 @@ export default function QuizScreen() {
       const passed = score >= 0.8;
       if (passed) {
         await markLessonComplete(id);
+        if (session?.user.id) {
+          const correctCount = newAnswers.filter(Boolean).length;
+          const xpAmount = correctCount * 5 + (score === 1 ? 35 : 20);
+          await addXP(session.user.id, xpAmount);
+          await refreshProfile();
+        }
       }
       router.replace({
         pathname: '/completion',

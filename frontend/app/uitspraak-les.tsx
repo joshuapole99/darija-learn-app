@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useProgress } from '../src/hooks/useProgress';
+import { useAuth } from '../src/context/AuthContext';
+import { addXP } from '../src/lib/xp';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -525,7 +527,8 @@ function CompleteScreen({ onClose }: { onClose: () => void }) {
 
 export default function UitspraakLesScreen() {
   const [stepIndex, setStepIndex] = useState(0);
-  const { markLessonComplete } = useProgress();
+  const { markLessonComplete, isLessonComplete } = useProgress();
+  const { session, refreshProfile } = useAuth();
 
   const totalSteps = STEPS.length;
   const currentStep = STEPS[stepIndex];
@@ -537,7 +540,12 @@ export default function UitspraakLesScreen() {
   };
 
   const handleComplete = async () => {
+    const alreadyDone = isLessonComplete('uitspraak-intro');
     await markLessonComplete('uitspraak-intro');
+    if (!alreadyDone && session?.user.id) {
+      await addXP(session.user.id, 25);
+      await refreshProfile();
+    }
     router.replace('/(tabs)');
   };
 
