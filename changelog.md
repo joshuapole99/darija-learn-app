@@ -15,6 +15,17 @@ Format: `[versie] — datum — beschrijving`
 
 ---
 
+## v0.3 — 2026-04-12
+
+- Gebruikersaccounts toegevoegd via Supabase (registreren + inloggen)
+- Avatar kiezen bij registratie (5 avatars met Darija-namen: Assad, Tha3lab, Dhib, Nsser, Qamar)
+- Profiel tab toont nu echte gebruikersnaam en gekozen avatar
+- Uitloggen knop toegevoegd op profiel pagina
+- Supabase RLS policies geconfigureerd (aparte INSERT/SELECT/UPDATE/DELETE policies)
+- Bugfix: avatar-kiezen scherm buiten (auth) group gezet om redirect-loop te voorkomen
+
+---
+
 ## v0.2 — 2026-04-11
 
 - Eilandenkaart uitgebreid naar 30 eilanden (3 chapters × 10)

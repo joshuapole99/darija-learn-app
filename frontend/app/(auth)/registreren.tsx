@@ -57,7 +57,7 @@ export default function RegistrerenScreen() {
     }
 
     // 3. Naar avatar kiezen
-    router.replace('/(auth)/avatar-kiezen');
+    router.replace('/avatar-kiezen');
   }
 
   return (

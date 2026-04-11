@@ -36,13 +36,13 @@ Doel: gebruikers komen terug elke dag en hebben een account.
 
 | # | Feature | Beschrijving | Status |
 |---|---------|--------------|--------|
-| 16 | Gebruikersaccounts | Registreren / inloggen (voortgang opgeslagen in de cloud) | Todo |
+| 16 | Gebruikersaccounts | Registreren / inloggen (voortgang opgeslagen in de cloud) | Done |
 | 17 | Onbeperkt leren (betaald) | Betaalde upgrade: geen daglimiet op fouten, oneindig oefenen | Todo |
 | 18 | Streaks | Dagelijkse leerstreak bijhouden | Todo |
 | 19 | XP-systeem | XP verdienen per voltooide les, quiz en dag-streak. Elke juiste vraag = XP, bonus bij 100% score | Todo |
 | 20 | Push notificaties | Herinnering om dagelijks te oefenen | Todo |
 | 21 | Profiel pagina | Voortgang, streak, XP, unlocked eilanden en gekozen avatar tonen | Todo |
-| 22 | Avatar / character kiezen | Gebruiker kiest bij registratie (en later in profiel) een personage uit een set van beschikbare avatars. Avatar zichtbaar op profiel en in de ranking | Todo |
+| 22 | Avatar / character kiezen | Gebruiker kiest bij registratie (en later in profiel) een personage uit een set van beschikbare avatars. Avatar zichtbaar op profiel en in de ranking | Done |
 | 23 | Ranglijst (leaderboard) | Globale ranglijst op basis van totaal XP. Toont username, avatar, XP en rank-badge. Dagelijks/wekelijks/alltime filter. Eigen positie altijd zichtbaar onderaan | Todo |
 | 24 | Rang-badges | Op basis van XP automatisch een rang toewijzen (bijv. Beginner → Leerling → Gevorderd → Meester → Darija Pro). Zichtbaar op profiel en in de ranglijst | Todo |
 

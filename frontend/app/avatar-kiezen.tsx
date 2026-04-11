@@ -4,9 +4,9 @@ import {
   StyleSheet, SafeAreaView, ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
-import { supabase } from '../../src/lib/supabase';
-import { AVATARS } from '../../src/data/avatars';
-import { useAuth } from '../../src/context/AuthContext';
+import { supabase } from '../src/lib/supabase';
+import { AVATARS } from '../src/data/avatars';
+import { useAuth } from '../src/context/AuthContext';
 
 export default function AvatarKiezenScreen() {
   const { session, refreshProfile } = useAuth();
