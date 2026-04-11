@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
+  Modal,
   StyleSheet,
   SafeAreaView,
   ScrollView,
@@ -11,7 +12,8 @@ import { router } from 'expo-router';
 import { useProgress } from '../../src/hooks/useProgress';
 import { ISLANDS } from '../../src/data/lessonData';
 import { useAuth } from '../../src/context/AuthContext';
-import { getAvatarById } from '../../src/data/avatars';
+import { AVATARS, getAvatarById } from '../../src/data/avatars';
+import { supabase } from '../../src/lib/supabase';
 
 // ─── Niveau-systeem ───────────────────────────────────────────────────────────
 
@@ -135,6 +137,104 @@ function getLevel(unlockedCount: number): CharacterLevel & { nextAt: number | nu
   return { ...current, nextAt: nextMinIslands, progress };
 }
 
+// ─── Avatar wijzigen modal ────────────────────────────────────────────────────
+
+function AvatarWijzigenModal({
+  zichtbaar,
+  huidigId,
+  onSluiten,
+  onOpgeslagen,
+}: {
+  zichtbaar: boolean;
+  huidigId: number;
+  onSluiten: () => void;
+  onOpgeslagen: () => void;
+}) {
+  const { session, refreshProfile } = useAuth();
+  const [gekozen, setGekozen] = useState(huidigId);
+  const [bezig, setBezig] = useState(false);
+  const [fout, setFout] = useState('');
+
+  async function handleOpslaan() {
+    if (!session?.user.id) return;
+    setBezig(true);
+    setFout('');
+    const { error } = await supabase
+      .from('profiles')
+      .update({ avatar_id: gekozen })
+      .eq('id', session.user.id);
+
+    if (error) {
+      setBezig(false);
+      setFout('Opslaan mislukt. Probeer opnieuw.');
+      return;
+    }
+
+    await refreshProfile();
+    setBezig(false);
+    onOpgeslagen();
+  }
+
+  return (
+    <Modal visible={zichtbaar} animationType="slide" transparent onRequestClose={onSluiten}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitel}>Avatar wijzigen</Text>
+            <TouchableOpacity onPress={onSluiten}>
+              <Text style={styles.modalSluiten}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.avatarGrid}>
+            {AVATARS.map((avatar) => {
+              const isGekozen = gekozen === avatar.id;
+              return (
+                <TouchableOpacity
+                  key={avatar.id}
+                  style={[
+                    styles.avatarKaart,
+                    isGekozen && { borderColor: avatar.kleur, borderWidth: 3 },
+                  ]}
+                  onPress={() => setGekozen(avatar.id)}
+                  activeOpacity={0.8}
+                >
+                  <View style={[styles.avatarKaartCircle, { backgroundColor: avatar.kleur + '22' }]}>
+                    <Text style={styles.avatarKaartEmoji}>{avatar.emoji}</Text>
+                    {isGekozen && (
+                      <View style={[styles.checkBadge, { backgroundColor: avatar.kleur }]}>
+                        <Text style={styles.checkText}>✓</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={[styles.avatarKaartNaam, isGekozen && { color: avatar.kleur }]}>
+                    {avatar.naam}
+                  </Text>
+                  <Text style={styles.avatarKaartDarija}>{avatar.darijaWoord}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {fout !== '' && (
+            <View style={styles.foutBox}>
+              <Text style={styles.foutText}>{fout}</Text>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={[styles.opslaanBtn, bezig && styles.btnDisabled]}
+            onPress={handleOpslaan}
+            disabled={bezig}
+          >
+            <Text style={styles.opslaanBtnText}>{bezig ? 'Opslaan...' : 'Opslaan'}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 // ─── Components ───────────────────────────────────────────────────────────────
 
 function StatCard({ emoji, label, value }: { emoji: string; label: string; value: string | number }) {
@@ -152,11 +252,13 @@ function LevelCard({
   total,
   username,
   avatarId,
+  onAvatarPress,
 }: {
   unlocked: number;
   total: number;
   username: string;
   avatarId: number;
+  onAvatarPress: () => void;
 }) {
   const level = getLevel(unlocked);
   const avatar = getAvatarById(avatarId);
@@ -171,10 +273,16 @@ function LevelCard({
         </Text>
       </View>
 
-      {/* Avatar + naam */}
-      <View style={[styles.avatarCircle, { backgroundColor: avatar.kleur + '22' }]}>
-        <Text style={styles.characterEmoji}>{avatar.emoji}</Text>
-      </View>
+      {/* Tappable avatar */}
+      <TouchableOpacity onPress={onAvatarPress} activeOpacity={0.8}>
+        <View style={[styles.avatarCircle, { backgroundColor: avatar.kleur + '22' }]}>
+          <Text style={styles.characterEmoji}>{avatar.emoji}</Text>
+        </View>
+        <View style={styles.wijzigBadge}>
+          <Text style={styles.wijzigBadgeText}>✏️</Text>
+        </View>
+      </TouchableOpacity>
+
       <Text style={styles.usernaam}>{username}</Text>
       <Text style={styles.avatarNaamLabel}>{avatar.naam} · {avatar.darijaWoord}</Text>
 
@@ -207,6 +315,7 @@ function LevelCard({
 export default function ProfielScreen() {
   const { progress, errorsToday } = useProgress();
   const { profile, signOut } = useAuth();
+  const [avatarModalZichtbaar, setAvatarModalZichtbaar] = useState(false);
 
   const completedLessons = progress?.completedLessons.length ?? 0;
   const unlockedIslands = progress?.unlockedIslands.length ?? 1;
@@ -227,7 +336,13 @@ export default function ProfielScreen() {
           <Text style={styles.headerTitle}>Profiel</Text>
         </View>
 
-        <LevelCard unlocked={unlockedIslands} total={totalIslands} username={username} avatarId={avatarId} />
+        <LevelCard
+          unlocked={unlockedIslands}
+          total={totalIslands}
+          username={username}
+          avatarId={avatarId}
+          onAvatarPress={() => setAvatarModalZichtbaar(true)}
+        />
 
         <View style={styles.statsRow}>
           <StatCard emoji="✅" label="Lessen voltooid" value={completedLessons} />
@@ -247,6 +362,13 @@ export default function ProfielScreen() {
           <Text style={styles.uitloggenBtnText}>Uitloggen</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <AvatarWijzigenModal
+        zichtbaar={avatarModalZichtbaar}
+        huidigId={avatarId}
+        onSluiten={() => setAvatarModalZichtbaar(false)}
+        onOpgeslagen={() => setAvatarModalZichtbaar(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -307,6 +429,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 4,
+  },
+  wijzigBadge: {
+    position: 'absolute',
+    bottom: 4,
+    right: -4,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  wijzigBadgeText: {
+    fontSize: 13,
   },
   characterEmoji: {
     fontSize: 52,
@@ -434,4 +575,90 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
+
+  // Avatar modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: '#FDF6EC',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    gap: 16,
+    paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalTitel: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1a1a1a',
+  },
+  modalSluiten: {
+    fontSize: 18,
+    color: '#888',
+    padding: 4,
+  },
+  avatarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'center',
+  },
+  avatarKaart: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 12,
+    alignItems: 'center',
+    gap: 4,
+    width: '28%',
+    borderWidth: 2,
+    borderColor: '#F0E6D3',
+  },
+  avatarKaartCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarKaartEmoji: { fontSize: 32 },
+  checkBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
+  avatarKaartNaam: { fontSize: 13, fontWeight: '700', color: '#1a1a1a' },
+  avatarKaartDarija: { fontSize: 11, color: '#999' },
+  foutBox: {
+    backgroundColor: '#FFEBEE',
+    borderRadius: 10,
+    padding: 12,
+  },
+  foutText: { color: '#C62828', fontSize: 14, fontWeight: '500', textAlign: 'center' },
+  opslaanBtn: {
+    backgroundColor: '#2E7D32',
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#2E7D32',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  btnDisabled: { backgroundColor: '#B0BEC5', shadowOpacity: 0, elevation: 0 },
+  opslaanBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });
